@@ -5,15 +5,9 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 
-// Anti-cache middleware - prevents ANY caching at CDN/proxy/browser level
+// Minimal anti-cache middleware - just the critical directive
 app.use((req, res, next) => {
-  res.set({
-    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-    'Pragma': 'no-cache',
-    'Expires': '0',
-    'Surrogate-Control': 'no-store',
-    'X-Accel-Expires': '0'
-  });
+  res.set('Cache-Control', 'no-store');
   next();
 });
 

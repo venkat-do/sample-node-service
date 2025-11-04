@@ -5,20 +5,39 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 
+// Anti-cache middleware - prevents ANY caching at CDN/proxy/browser level
+app.use((req, res, next) => {
+  res.set({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    'Surrogate-Control': 'no-store',
+    'X-Accel-Expires': '0'
+  });
+  next();
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
+    timestampMs: Date.now(),
     uptime: process.uptime(),
-    version: '1.0.0'
+    version: '1.0.0',
+    requestId: Math.random().toString(36).substring(7)
   });
 });
 
-// Root endpoint
+// Root endpoint - with dynamic content to prevent caching
 app.get('/', (req, res) => {
   res.json({
     message: 'Welcome to the Sample Node.js Web Service!',
+    timestamp: new Date().toISOString(),
+    timestampMs: Date.now(),
+    random: Math.random(),
+    requestId: Math.random().toString(36).substring(7),
+    processId: process.pid,
     endpoints: [
       'GET / - This endpoint',
       'GET /health - Health check',
